@@ -34,46 +34,64 @@ Container.get(Bar).sayHi();
 IoC & Decorators based CLI App builder, with built-in devkit.
 
 ```typescript
-import { CLI, BaseCommand } from "mustard-cli";
-import { Command, Option } from "mustard-cli/decorators";
-import { Validator } from "mustard-cli/validator";
+#!/usr/bin/env node
 
-@Command("run")
-class HelloCommand extends BaseCommand {
-  constructor() {
-    super();
-  }
+import { MustardFactory } from "mustard-cli";
+import {
+  Command,
+  RootCommand,
+  Option,
+  VariadicOption,
+  App,
+} from "mustard-cli/Decorators";
+import { Validator } from "mustard-cli/Validator";
+import { CommandStruct, MustardApp } from "mustard-cli/ComanndLine";
 
-  @Option()
-  public dry: boolean;
-
-  @Option([Validator.Required.isString])
-  public name: boolean;
+@RootCommand()
+class RootCommandHandle implements CommandStruct {
+  @Option("d")
+  public msg = "default value of msg";
 
   public run(): void {
-    const modeType = this.outputUtils.highlightText(
-      this.dry ? "Dry" : "Active"
-    );
-
-    console.log(`Hi ${this.name}, You are in ${modeType} mode.`);
-
-    // chaining fs api
-    this.fs
-      .writeFileSync("test.txt", "Hello World!")
-      .appendFileSync()
-      .readFileSync();
+    console.log("Root Command! ", this.msg);
   }
 }
 
-const cli = new CLI("MustardCLI", [HelloCommand], {
-  // equivalent to the version filed of nearest package.json
-  version: "auto",
-  // print usage information if no command is provided
-  usage: true,
-});
+@Command("update", "u", "update project dependencies")
+class UpdateCommand implements CommandStruct {
+  @Option("depth", "depth of packages to update", Validator.Number().Gte(1))
+  public depth = 10;
 
-cli.init();
+  @Option(Validator.Boolean())
+  public dry = false;
 
+  @Option("all")
+  public applyAll: boolean;
+
+  @VariadicOption()
+  public packages: string[];
+
+  public run(): void {
+    console.warn("DryRun Mode: ", this.dry);
+    console.info("Execution Depth", this.depth);
+    console.info("Specified Packages", this.packages);
+  }
+}
+
+@App({
+  name: "LinbuduLab CLI",
+  commands: [RootCommandHandle, UpdateCommand],
+  configurations: {
+    enableVersion: require("./package.json").version,
+  },
+})
+class Project implements MustardApp {
+  onStart() {}
+
+  onComplete() {}
+}
+
+MustardFactory.init(Project).start();
 ```
 
 
