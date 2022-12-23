@@ -1,5 +1,24 @@
 # Incubations
 
+## ES-Decorator-Utils
+
+Decorator based function utilities in ES Native Decorator implementation.
+
+```typescript
+import { Memo, Profile, Once } from "es-decorator-utils";
+
+class Utils {
+  @Once()
+  InitializedOnceOnly() {}
+  
+  @Memo()
+  Memorized() {}
+  
+  @Profile()
+  FetchWithProfile() {}
+}
+```
+
 ## Mustard
 
 Simple yet powerful IoC container in ES Native Decorator implementation.
